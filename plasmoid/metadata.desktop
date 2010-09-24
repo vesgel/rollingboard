@@ -1,0 +1,18 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name= RollingBoard
+ServiceTypes=Plasma/Applet
+Type=Service
+Icon=battery                                                 # FIXME
+X-Plasma-API=python
+X-Plasma-MainScript=code/main.py
+ 
+X-KDE-PluginInfo-Author=Volkan Esgel
+X-KDE-PluginInfo-Email=vesgel [at] gmail.com
+X-KDE-PluginInfo-Name=rollingboard
+X-KDE-PluginInfo-Version=pre0.1
+X-KDE-PluginInfo-Website=http://www.volkanesgel.com/blog     # FIXME
+X-KDE-PluginInfo-Category=Education
+X-KDE-PluginInfo-Depends=
+X-KDE-PluginInfo-License=GPLv3
+X-KDE-PluginInfo-EnabledByDefault=true
