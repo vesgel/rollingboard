@@ -1,0 +1,7 @@
+NOTE: This is an EXPERIMENTAL project for now and may not work properly yet!
+
+RollingBoard is a KDE4 plasmoid which shows random texts for different time periods.
+
+To run and test the rollingboard plasmoid, download the project and run the following command in project directory:
+
+python plasmoid.py -t
