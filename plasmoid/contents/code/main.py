@@ -15,6 +15,7 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from PyKDE4.plasma import Plasma
 from PyKDE4 import plasmascript
+from html_parser import *
 
 class RollingBoard(plasmascript.Applet):
 
@@ -34,14 +35,16 @@ class RollingBoard(plasmascript.Applet):
 
     def __createMainLayout(self):
         self.mainLayout = QGraphicsLinearLayout(Qt.Vertical, self.applet)
+        self.document = Document(self.package().path() + "contents/code/words_of_wisdom.txt")
 
-        text = "<b><i>Just a try</i></b>. This is an experimental plasmoid and may not work properly."
+        #text = "<b><i>Just a try</i></b>. This is an experimental plasmoid and may not work properly."
+        text = self.document.get_random_line().__unicode__()
 
         textBrowser = Plasma.TextBrowser(self.applet)
         textBrowserNW = textBrowser.nativeWidget()
         textBrowserNW.setReadOnly(True)
         textBrowser.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        textBrowser.setText(unicode(text, 'UTF-8'))
+        textBrowser.setText(text) # unicode(text, 'UTF-8'))
         textBrowser.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         textBrowser.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)        
         self.mainLayout.addItem(textBrowser)
