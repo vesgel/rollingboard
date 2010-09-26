@@ -32,15 +32,22 @@ def main():
     elif options.install:
         os.system('plasmapkg -i %s.zip' % NAME_OF_PLASMOID)
     elif options.remove:
+        removeArchive()
         os.system('plasmapkg -r %s' % NAME_OF_PLASMOID)
     elif options.view:
         os.system('plasmoidviewer %s' % NAME_OF_PLASMOID)
     elif options.test:
+        removeArchive()
         os.system('plasmapkg -r %s' % NAME_OF_PLASMOID)
         os.system('zip -r ./%s.zip plasmoid/' % NAME_OF_PLASMOID)
         os.system('plasmapkg -i %s.zip' % NAME_OF_PLASMOID)
         os.system('plasmoidviewer %s' % NAME_OF_PLASMOID)
 
+def removeArchive():
+    try:
+        os.remove('%s.zip' % NAME_OF_PLASMOID)
+    except:
+        pass
+
 if __name__ == '__main__':
     main()
-
