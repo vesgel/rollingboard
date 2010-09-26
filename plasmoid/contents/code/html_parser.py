@@ -13,13 +13,31 @@
 
 from string import strip
 import random
+import re
+import os
+import tarfile
 
 class Document:
     def __init__(self, filename):
+	self.ungz_if_needed(filename)
         self.lines = map( strip, open(filename).readlines() )
         self.current_line = -1
         self.size = len(self.lines)
 
+    def ungz_if_needed(self, filename):
+	"""Checks if input file exists. If it does not, tries to ungz the tar archive.
+	If neither that exists, raises Exception."""
+	if os.path.exists(filename):
+	    return
+	
+	tarname = filename+".tar.gz"
+	if os.path.exists(tarname):
+	    tar = tarfile.open(filename, 'r:gz')
+	    for item in tar:
+		tar.extract(item)
+	else:
+	    raise Exception, "Neither %s nor %s does not exist." % (filename, tarname)
+	
     def get_random_line(self):
         return Line( random.choice(self.lines) )
 
@@ -48,14 +66,19 @@ class Line:
 	
     def get_ff_link(self):
 	return '<a href="http://friendfeed.com/share/bookmarklet/frame#title=%s" title="Click to share this on FriendFeed">FriendFeed</a>' % self.plain_text
+
+    
+    def remove_html_tags(self, data):
+	p = re.compile(r'<.*?>')
+	return p.sub('', data)
 	
     def merge(self):
         """Merges text and author fields as two paragraphs."""
         # might need some quoting for " here.
-        self.plain_text = "%s" % self.text
+        self.plain_text = "%s" % self.remove_html_tags(self.text)
         self.html_text = '<p>%s</p>' % self.text
         if self.author:
-	    self.plain_text += " -- %s" % self.author
+	    self.plain_text += " -- %s" % self.remove_html_tags(self.author)
             self.html_text+= '<p align="right"><strong><i>%s</i></strong></p>' % self.author
 
 	self.html_text += "<p>Share on %s</p>" % ( " / ".join( (self.get_twitter_link(), self.get_ff_link()) ) )
