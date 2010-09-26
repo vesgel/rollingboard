@@ -13,6 +13,7 @@
 
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
+from PyQt4 import uic
 from PyKDE4.plasma import Plasma
 from PyKDE4 import plasmascript
 from html_parser import Document
@@ -64,6 +65,8 @@ class RollingBoard(plasmascript.Applet):
         self.resize(400, 100)
         self.__createMainLayout()
 
+        self.conf = self.config()
+
     def fetchRandomLine(self):
 	self.line = self.document.get_random_line()
 	self.textBrowser.refreshText()
@@ -87,6 +90,35 @@ class RollingBoard(plasmascript.Applet):
         self.mainLayout.addItem(textBrowser)
 
         self.applet.setLayout(self.mainLayout)
+
+    def createConfigurationInterface(self, parent):
+        self.connect(parent, SIGNAL("okClicked()"), self.configAccepted)
+        self.connect(parent, SIGNAL("cancelClicked()"), self.configDenied)
+        
+        self.generalConfigPage = QWidget(parent)
+        uic.loadUi(self.package().filePath('ui', 'generalconfig.ui'), self.generalConfigPage)
+        parent.addPage(self.generalConfigPage, "General", 'configure', "General Configuration Options")
+
+        confGroup = self.conf.group("General")
+
+        if confGroup.hasKey("sourceFile"):
+            sourceFile = self.conf.group("General").readEntry("sourceFile")
+            self.generalConfigPage.sourceFile.setText(sourceFile)
+        if confGroup.hasKey("textColor"):
+            textColor = self.conf.group("General").readEntry("textColor", QColor(0xcc, 0xcc, 0xcc))
+            self.generalConfigPage.textColor.setColor(QColor(textColor))
+        if confGroup.hasKey("authorColor"):
+            authorColor = self.conf.group("General").readEntry("authorColor", QColor(0xcc, 0xcc, 0xcc))
+            self.generalConfigPage.authorColor.setColor(QColor(authorColor))
+
+    def configAccepted(self):
+        confGroup = self.conf.group("General")
+        confGroup.writeEntry("sourceFile", self.generalConfigPage.sourceFile.text())
+        confGroup.writeEntry("textColor", self.generalConfigPage.textColor.color())
+        confGroup.writeEntry("authorColor", self.generalConfigPage.authorColor.color())
+
+    def configDenied(self):
+        print "..config denied!.."
 
 def CreateApplet(parent):
     return RollingBoard(parent)
