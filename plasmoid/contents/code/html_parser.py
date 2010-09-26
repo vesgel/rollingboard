@@ -62,10 +62,16 @@ class Line:
         self.merge()
 
     def get_twitter_link(self):
-	return '<a href="http://twitter.com/home?status=%s" title="Click to share this on Twitter">Twitter</a>' % self.plain_text
-	
+	return "http://twitter.com/home?status=%s" % self.plain_text
+    
     def get_ff_link(self):
-	return '<a href="http://friendfeed.com/share/bookmarklet/frame#title=%s" title="Click to share this on FriendFeed">FriendFeed</a>' % self.plain_text
+	return "http://friendfeed.com/share/bookmarklet/frame#title=%s" % self.plain_text
+	
+    def get_twitter_href(self):
+	return '<a href="%s" title="Click to share this on Twitter">Twitter</a>' % self.get_twitter_link()
+
+    def get_ff_href(self):
+	return '<a href="%s" title="Click to share this on FriendFeed">FriendFeed</a>' % self.get_ff_link()
 
     
     def remove_html_tags(self, data):
@@ -81,7 +87,7 @@ class Line:
 	    self.plain_text += " -- %s" % self.remove_html_tags(self.author)
             self.html_text+= '<p align="right"><strong><i>%s</i></strong></p>' % self.author
 
-	self.html_text += "<p>Share on %s</p>" % ( " / ".join( (self.get_twitter_link(), self.get_ff_link()) ) )
+	self.html_text += "<p>Share on %s</p>" % ( " / ".join( (self.get_twitter_href(), self.get_ff_href()) ) )
 	
     def __repr__(self):
         return self.html_text

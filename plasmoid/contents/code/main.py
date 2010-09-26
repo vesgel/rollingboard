@@ -16,6 +16,8 @@ from PyQt4.QtGui import *
 from PyKDE4.plasma import Plasma
 from PyKDE4 import plasmascript
 from html_parser import Document
+import webbrowser
+
 
 class LineDisplayer(Plasma.TextBrowser):
     def __init__(self, parent=None):
@@ -25,13 +27,27 @@ class LineDisplayer(Plasma.TextBrowser):
     def contextMenuEvent(self, event):
 	self.menu = menu = QMenu(None)
 	copyToClipboard = menu.addAction("Copy to clipboard")
+	twitter = menu.addAction("Share on Twitter")
+	friendfeed = menu.addAction("Share on FriendFeed")
 	
 	action = menu.exec_(event.screenPos())
         
         if action == copyToClipboard:
 	    clipboard = QApplication.clipboard()
-	    clipboard.setText(self.line.plain_text)
+	    clipboard.setText(self.board.line.plain_text)
+	elif action == twitter:
+	    webbrowser.open(self.board.line.get_twitter_link())
+	elif action == friendfeed:
+	    webbrowser.open(self.board.line.get_ff_link())
 
+    def mousePressEvent(self, event):
+	#Plasma.TextBrowser.mousePressEvent(self, event)
+	if event.button() == Qt.LeftButton:	    
+	    self.board.fetchRandomLine()
+
+    def refreshText(self):
+	self.setText(self.board.line.__unicode__())
+	
 class RollingBoard(plasmascript.Applet):
 
     def __init__(self, parent, args=None):
@@ -48,19 +64,24 @@ class RollingBoard(plasmascript.Applet):
         self.resize(400, 100)
         self.__createMainLayout()
 
+    def fetchRandomLine(self):
+	self.line = self.document.get_random_line()
+	self.textBrowser.refreshText()
+	
     def __createMainLayout(self):
         self.mainLayout = QGraphicsLinearLayout(Qt.Vertical, self.applet)
         self.document = Document(self.package().path() + "contents/code/boncuk.txt")
 
         self.line = self.document.get_random_line()
-        text = self.line.__unicode__()
 
-        textBrowser = LineDisplayer(self.applet)
-        textBrowser.line = self.line
+        self.textBrowser = textBrowser = LineDisplayer(self.applet)
+        textBrowser.board = self
+        
         textBrowserNW = textBrowser.nativeWidget()
         textBrowserNW.setReadOnly(True)
+        
+        textBrowser.refreshText()
         textBrowser.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        textBrowser.setText(text)
         textBrowser.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         textBrowser.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)        
         self.mainLayout.addItem(textBrowser)
