@@ -17,6 +17,7 @@ from PyQt4 import uic
 from PyKDE4.plasma import Plasma
 from PyKDE4 import plasmascript
 from html_parser import Document
+from configs import GeneralConfig
 import webbrowser
 
 
@@ -65,7 +66,8 @@ class RollingBoard(plasmascript.Applet):
         self.resize(400, 100)
         self.__createMainLayout()
 
-        self.conf = self.config()
+        conf = self.config()
+        self.generalConfig = GeneralConfig(conf)
 
     def fetchRandomLine(self):
 	self.line = self.document.get_random_line()
@@ -98,24 +100,19 @@ class RollingBoard(plasmascript.Applet):
         self.generalConfigPage = QWidget(parent)
         uic.loadUi(self.package().filePath('ui', 'generalconfig.ui'), self.generalConfigPage)
         parent.addPage(self.generalConfigPage, "General", 'configure', "General Configuration Options")
-
-        confGroup = self.conf.group("General")
-
-        if confGroup.hasKey("sourceFile"):
-            sourceFile = self.conf.group("General").readEntry("sourceFile")
-            self.generalConfigPage.sourceFile.setText(sourceFile)
-        if confGroup.hasKey("textColor"):
-            textColor = self.conf.group("General").readEntry("textColor", QColor(0xcc, 0xcc, 0xcc))
-            self.generalConfigPage.textColor.setColor(QColor(textColor))
-        if confGroup.hasKey("authorColor"):
-            authorColor = self.conf.group("General").readEntry("authorColor", QColor(0xcc, 0xcc, 0xcc))
-            self.generalConfigPage.authorColor.setColor(QColor(authorColor))
-
+        
+        sourceFile, textColor, authorColor = self.generalConfig.readConfig()
+        
+        self.generalConfigPage.sourceFile.setText(sourceFile)
+        self.generalConfigPage.textColor.setColor(QColor(textColor))
+        self.generalConfigPage.authorColor.setColor(QColor(authorColor))
+        
     def configAccepted(self):
-        confGroup = self.conf.group("General")
-        confGroup.writeEntry("sourceFile", self.generalConfigPage.sourceFile.text())
-        confGroup.writeEntry("textColor", self.generalConfigPage.textColor.color())
-        confGroup.writeEntry("authorColor", self.generalConfigPage.authorColor.color())
+        sourceFile = self.generalConfigPage.sourceFile.text()
+        textColor = self.generalConfigPage.textColor.color()
+        authorColor = self.generalConfigPage.authorColor.color()
+
+        self.generalConfig.writeConfig(sourceFile, QVariant(textColor), QVariant(authorColor))
 
     def configDenied(self):
         print "..config denied!.."
