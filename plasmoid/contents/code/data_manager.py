@@ -48,7 +48,7 @@ class DataManager:
 	for item in tar:
 	    tar.extract(item)
 	print 'Extracted.'
-	return names	
+	return names
 	
     def _download_targz(self, url):
 	

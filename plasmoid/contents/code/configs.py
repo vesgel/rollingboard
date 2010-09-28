@@ -29,7 +29,7 @@ class GeneralConfig:
         if generalGroup.hasKey("sourceFile"):
             sourceFile = generalGroup.readEntry("sourceFile")
         else:
-            sourceFile = ''
+            sourceFile = None
             
         if generalGroup.hasKey("textColor"):
             textColor = generalGroup.readEntry("textColor", QColor(0xcc, 0xcc, 0xcc))
