@@ -21,27 +21,19 @@ from PyQt4.QtGui import QColor
 from configs import GeneralConfig
 
 class Document:
-    def __init__(self, filename, config):
-	self.ungz_if_needed(filename)
+    def __init__(self, package_path, config):
+	self.config = config
+	conf = GeneralConfig(config)
+	filename = conf.readConfig()[0]
+	print "filename:",filename
+	if not filename:
+	    filename = package_path + "contents/data/words_of_wisdom.txt"
+	    print "now:",filename
+	    
         self.lines = map( strip, open(filename).readlines() )
         self.current_line = -1
         self.size = len(self.lines)
-        self.config = config
-
-    def ungz_if_needed(self, filename):
-	"""Checks if input file exists. If it does not, tries to ungz the tar archive.
-	If neither that exists, raises Exception."""
-	if os.path.exists(filename):
-	    return
-	
-        filepath = filename.rsplit("/", 1)[0]
-        tarname = "%s.tar.gz" % filename
-	if os.path.exists(tarname):
-            tar = tarfile.open(tarname, 'r:gz')
-	    for item in tar:
-		tar.extract(item, filepath)
-	else:
-	    raise Exception, "Neither %s nor %s does not exist." % (filename, tarname)
+        
 	
     def get_random_line(self):
         return Line( random.choice(self.lines), self.config )
@@ -89,10 +81,10 @@ class Line:
         """Merges text and author fields as two paragraphs."""
         # might need some quoting for " here.
         self.plain_text = "%s" % self.remove_html_tags(self.text)
-        self.html_text = '<p style="color:%s">%s</p>' % (self.textColor.toString(), self.text)
+        self.html_text = '<p style="color:%s">%s</p>' % (QColor(self.textColor).name(), self.text)
         if self.author:
 	    self.plain_text += " -- %s" % self.remove_html_tags(self.author)
-            self.html_text+= '<p align="right" style="color:%s"><strong><i>%s</i></strong></p>' % (self.authorColor.toString(), self.author)
+            self.html_text+= '<p align="right" style="color:%s"><strong><i>%s</i></strong></p>' % (QColor(self.authorColor).name(), self.author)
 
 	self.html_text += "<p>Share on %s</p>" % ( " / ".join( (self.get_twitter_href(), self.get_ff_href()) ) )
 	

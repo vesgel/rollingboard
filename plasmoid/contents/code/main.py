@@ -18,7 +18,9 @@ from PyKDE4.plasma import Plasma
 from PyKDE4 import plasmascript
 from html_parser import Document
 from configs import GeneralConfig
+from data_manager import DataManager
 import webbrowser
+
 
 
 class LineDisplayer(Plasma.TextBrowser):
@@ -76,7 +78,7 @@ class RollingBoard(plasmascript.Applet):
 	
     def __createMainLayout(self):
         self.mainLayout = QGraphicsLinearLayout(Qt.Vertical, self.applet)
-        self.document = Document( "%s/contents/code/boncuk.txt" % self.package().path(), self.conf )
+        self.document = Document(self.package().path(), self.conf)
 
         self.line = self.document.get_random_line()
 
