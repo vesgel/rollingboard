@@ -17,12 +17,16 @@ import re
 import os
 import tarfile
 
+from PyQt4.QtGui import QColor
+from configs import GeneralConfig
+
 class Document:
-    def __init__(self, filename):
+    def __init__(self, filename, config):
 	self.ungz_if_needed(filename)
         self.lines = map( strip, open(filename).readlines() )
         self.current_line = -1
         self.size = len(self.lines)
+        self.config = config
 
     def ungz_if_needed(self, filename):
 	"""Checks if input file exists. If it does not, tries to ungz the tar archive.
@@ -39,13 +43,13 @@ class Document:
 	    raise Exception, "Neither %s nor %s does not exist." % (filename, tarname)
 	
     def get_random_line(self):
-        return Line( random.choice(self.lines) )
+        return Line( random.choice(self.lines), self.config )
 
     def get_next_line(self):
         self.current_line += 1
         if self.current_line >= self.size:
             self.current_line = 0
-        return Line( self.lines[self.current_line] )
+        return Line( self.lines[self.current_line], self.config )
 
 
     def get_previous_line(self):
@@ -53,12 +57,14 @@ class Document:
         if self.current_line < 0:
             # yes this is required as after -1*size, it blows up!
             self.current_line = self.size - 1
-        return Line( self.lines[self.current_line] )
+        return Line( self.lines[self.current_line], self.config )
 
 
 class Line:
-    def __init__(self, line):
+    def __init__(self, line, config):
         self.text, self.author = line.split("|")
+        conf = GeneralConfig(config)
+        self.sourceFile, self.textColor, self.authorColor = conf.readConfig()
         self.merge()
 
     def get_twitter_link(self):
@@ -82,10 +88,10 @@ class Line:
         """Merges text and author fields as two paragraphs."""
         # might need some quoting for " here.
         self.plain_text = "%s" % self.remove_html_tags(self.text)
-        self.html_text = '<p>%s</p>' % self.text
+        self.html_text = '<p style="color:%s">%s</p>' % (self.textColor.toString(), self.text)
         if self.author:
 	    self.plain_text += " -- %s" % self.remove_html_tags(self.author)
-            self.html_text+= '<p align="right"><strong><i>%s</i></strong></p>' % self.author
+            self.html_text+= '<p align="right" style="color:%s"><strong><i>%s</i></strong></p>' % (self.authorColor.toString(), self.author)
 
 	self.html_text += "<p>Share on %s</p>" % ( " / ".join( (self.get_twitter_href(), self.get_ff_href()) ) )
 	
