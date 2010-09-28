@@ -105,6 +105,8 @@ class RollingBoard(plasmascript.Applet):
         parent.addPage(self.generalConfigPage, "General", 'configure', "General Configuration Options")
         
         sourceFile, textColor, authorColor = self.generalConfig.readConfig()
+        if not sourceFile:
+            sourceFile = ""
         
         self.generalConfigPage.sourceFile.setText(sourceFile)
         self.generalConfigPage.textColor.setColor(QColor(textColor))
