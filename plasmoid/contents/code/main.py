@@ -64,10 +64,11 @@ class RollingBoard(plasmascript.Applet):
         self.setBackgroundHints(Plasma.Applet.DefaultBackground)
 
         self.resize(400, 100)
-        self.__createMainLayout()
 
-        conf = self.config()
-        self.generalConfig = GeneralConfig(conf)
+        self.conf = self.config()
+        self.generalConfig = GeneralConfig(self.conf)
+        
+        self.__createMainLayout()
 
     def fetchRandomLine(self):
 	self.line = self.document.get_random_line()
