@@ -76,7 +76,7 @@ class RollingBoard(plasmascript.Applet):
 	
     def __createMainLayout(self):
         self.mainLayout = QGraphicsLinearLayout(Qt.Vertical, self.applet)
-        self.document = Document(self.package().path() + "contents/code/boncuk.txt", self.conf)
+        self.document = Document( "%s/contents/code/boncuk.txt" % self.package().path(), self.conf )
 
         self.line = self.document.get_random_line()
 

@@ -34,11 +34,12 @@ class Document:
 	if os.path.exists(filename):
 	    return
 	
-	tarname = filename+".tar.gz"
+        filepath = filename.rsplit("/", 1)[0]
+        tarname = "%s.tar.gz" % filename
 	if os.path.exists(tarname):
-	    tar = tarfile.open(filename, 'r:gz')
+            tar = tarfile.open(tarname, 'r:gz')
 	    for item in tar:
-		tar.extract(item)
+		tar.extract(item, filepath)
 	else:
 	    raise Exception, "Neither %s nor %s does not exist." % (filename, tarname)
 	
