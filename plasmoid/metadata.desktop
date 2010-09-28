@@ -3,7 +3,7 @@ Encoding=UTF-8
 Name= RollingBoard
 ServiceTypes=Plasma/Applet
 Type=Service
-Icon=battery                                                 # FIXME
+Icon=applications-education-mathematics
 X-Plasma-API=python
 X-Plasma-MainScript=code/main.py
  
