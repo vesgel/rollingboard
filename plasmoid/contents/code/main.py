@@ -18,6 +18,7 @@ from PyKDE4.plasma import Plasma
 from PyKDE4 import plasmascript
 from html_parser import Document
 from configs import GeneralConfig
+from widgets import ASPopup
 from data_manager import DataManager
 import webbrowser
 
@@ -123,29 +124,60 @@ class RollingBoard(plasmascript.Applet):
         self.connect(parent, SIGNAL("okClicked()"), self.configAccepted)
         self.connect(parent, SIGNAL("cancelClicked()"), self.configDenied)
         
-        self.generalConfigPage = QWidget(parent)
-        uic.loadUi(self.package().filePath('ui', 'generalconfig.ui'), self.generalConfigPage)
-        parent.addPage(self.generalConfigPage, "General", 'configure', "General Configuration Options")
+        self.generalCP = QWidget(parent)  # General Config Page
+        uic.loadUi(self.package().filePath('ui', 'generalconfig.ui'), self.generalCP)
+        parent.addPage(self.generalCP, "General", 'configure', "General Configuration Options")
         
-        sourceFile, textColor, authorColor = self.generalConfig.readConfig()
-        if not sourceFile:
-            sourceFile = ""
+        ASMenu = ASPopup(self.generalCP)
+        self.generalCP.autoSource.setMenu(ASMenu)
         
-        self.generalConfigPage.sourceFile.setText(sourceFile)
-        self.generalConfigPage.textColor.setColor(QColor(textColor))
-        self.generalConfigPage.authorColor.setColor(QColor(authorColor))
+        values = self.generalConfig.readConfig()
+        if not values['source']:
+            values['source'] = ""
+            ## FIXME: This assignment might be cause empty addresses in sourceAddress
+
+        if values['sourceType']:
+            if values['sourceType'] == 'Auto':
+                print "Auto Source"
+            else:
+                print "Manual Source"
+
+        if self.generalCP.rdb_autoSource.isChecked():
+            self.generalCP.manualSource.setEnabled(False)
+        else:
+            self.generalCP.autoSource.setEnabled(False)
+
+        self.generalCP.manualSource.setText(values['source'])  ## !!!!!!!!!!!!!!!!!!!!!!!!!!!
+        self.generalCP.textColor.setColor(QColor(values['textColor']))
+        self.generalCP.authorColor.setColor(QColor(values['authorColor']))
+
+        # We have only two radio buttons and connecting one of them with signal is OK.
+        self.connect(self.generalCP.rdb_manualSource, SIGNAL("toggled(bool)"), self.sourceChanged)
         
     def configAccepted(self):
-        sourceFile = self.generalConfigPage.sourceFile.text()
-        textColor = self.generalConfigPage.textColor.color()
-        authorColor = self.generalConfigPage.authorColor.color()
+        values = { 'sourceType'  : None,
+                   'source'      : None,
+                   'textColor'   : None,
+                   'authorColor' : None }
+        
+        if self.generalCP.rdb_autoSource.isChecked():
+            values['sourceType'] = "Auto"
+            #values['source'] = self.generalCP.sourceAddress.currentText()
+        else:
+            values['sourceType'] = "Manual"
+            values['source'] = self.generalGP.manualSource.text()
+        values['textColor'] = self.generalCP.textColor.color()
+        values['authorColor'] = self.generalCP.authorColor.color()
 
-        self.generalConfig.writeConfig(sourceFile, QVariant(textColor), QVariant(authorColor))
+        self.generalConfig.writeConfig(values)
         #self.__resetTimer()
-
 
     def configDenied(self):
         print "..config denied!.."
+
+    def sourceChanged(self, value):
+        self.generalCP.manualSource.setEnabled(value)
+        self.generalCP.autoSource.setEnabled(not value)
 
 def CreateApplet(parent):
     return RollingBoard(parent)

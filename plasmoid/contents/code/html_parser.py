@@ -24,7 +24,7 @@ class Document:
     def __init__(self, package_path, config):
 	self.config = config
 	conf = GeneralConfig(config)
-	filename = conf.readConfig()[0]
+	filename = conf.readConfig()['source']
 	print "filename:",filename
 	if not filename:
 	    filename = package_path + "contents/data/words_of_wisdom.txt"
@@ -57,7 +57,7 @@ class Line:
     def __init__(self, line, config):
         self.text, self.author = line.split("|")
         conf = GeneralConfig(config)
-        self.sourceFile, self.textColor, self.authorColor = conf.readConfig()
+        self.values = conf.readConfig()
         self.merge()
 
     def get_twitter_link(self):
@@ -81,10 +81,10 @@ class Line:
         """Merges text and author fields as two paragraphs."""
         # might need some quoting for " here.
         self.plain_text = "%s" % self.remove_html_tags(self.text)
-        self.html_text = '<p style="color:%s">%s</p>' % (QColor(self.textColor).name(), self.text)
+        self.html_text = '<p style="color:%s">%s</p>' % (QColor(self.values['textColor']).name(), self.text)
         if self.author:
 	    self.plain_text += " -- %s" % self.remove_html_tags(self.author)
-            self.html_text+= '<p align="right" style="color:%s"><strong><i>%s</i></strong></p>' % (QColor(self.authorColor).name(), self.author)
+            self.html_text+= '<p align="right" style="color:%s"><strong><i>%s</i></strong></p>' % (QColor(self.values['authorColor']).name(), self.author)
 
 	self.html_text += "<p>Share on %s</p>" % ( " / ".join( (self.get_twitter_href(), self.get_ff_href()) ) )
 	

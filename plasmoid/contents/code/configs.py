@@ -20,30 +20,35 @@ class GeneralConfig:
         self.readConfig()
 
     def readConfig(self):
-        sourceFile = None
-        textColor = None
-        authorColor = None
+        values = { 'sourceType'  : None,
+                   'source'      : None,
+                   'textColor'   : None,
+                   'authorColor' : None }
 
         generalGroup = self.config.group("General")
 
-        if generalGroup.hasKey("sourceFile"):
-            sourceFile = generalGroup.readEntry("sourceFile")
+        if generalGroup.hasKey("sourceType"):
+            values['sourceType'] = generalGroup.readEntry("sourceType")
+
+        if generalGroup.hasKey("source"):
+            values['source'] = generalGroup.readEntry("source")
 
         if generalGroup.hasKey("textColor"):
-            textColor = generalGroup.readEntry("textColor", QColor(0xcc, 0xcc, 0xcc))
+            values['textColor'] = generalGroup.readEntry("textColor", QColor(0xcc, 0xcc, 0xcc))
         else:
-            textColor = Qt.white
+            values['textColor'] = Qt.white
 
         if generalGroup.hasKey("authorColor"):
-            authorColor = generalGroup.readEntry("authorColor", QColor(0xcc, 0xcc, 0xcc))
+            values['authorColor'] = generalGroup.readEntry("authorColor", QColor(0xcc, 0xcc, 0xcc))
         else:
-            authorColor = Qt.green
+            values['authorColor'] = Qt.green
 
-        return sourceFile, textColor, authorColor
+        return values
 
-    def writeConfig(self, sourceFile, textColor, authorColor):
+    def writeConfig(self, values):
         generalGroup = self.config.group("General")
 
-        generalGroup.writeEntry("sourceFile", sourceFile)
-        generalGroup.writeEntry("textColor", textColor)
-        generalGroup.writeEntry("authorColor", authorColor)
+        generalGroup.writeEntry("sourceType", values['sourceType'])
+        generalGroup.writeEntry("source", values['source'])
+        generalGroup.writeEntry("textColor", values['textColor'])
+        generalGroup.writeEntry("authorColor", values['authorColor'])

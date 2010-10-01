@@ -7,13 +7,13 @@
     <x>0</x>
     <y>0</y>
     <width>505</width>
-    <height>172</height>
+    <height>208</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>490</width>
-    <height>172</height>
+    <width>505</width>
+    <height>208</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -25,7 +25,7 @@
      <x>10</x>
      <y>10</y>
      <width>481</width>
-     <height>151</height>
+     <height>187</height>
     </rect>
    </property>
    <layout class="QGridLayout" name="gridLayout_2">
@@ -55,21 +55,7 @@
       </property>
      </spacer>
     </item>
-    <item row="1" column="1">
-     <layout class="QHBoxLayout" name="horizontalLayout">
-      <item>
-       <widget class="QLabel" name="lbl_sourceFile">
-        <property name="text">
-         <string>Source File :</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="KUrlRequester" name="sourceFile"/>
-      </item>
-     </layout>
-    </item>
-    <item row="2" column="0">
+    <item row="3" column="0">
      <widget class="QLabel" name="label">
       <property name="font">
        <font>
@@ -82,12 +68,12 @@
       </property>
      </widget>
     </item>
-    <item row="3" column="1">
+    <item row="4" column="1">
      <layout class="QGridLayout" name="gridLayout">
       <item row="0" column="0">
        <widget class="QLabel" name="lbl_textColor">
         <property name="text">
-         <string>Default Color for Text            :</string>
+         <string>Default Color for Text :</string>
         </property>
        </widget>
       </item>
@@ -112,7 +98,7 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="3">
+      <item row="0" column="1">
        <spacer name="horizontalSpacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -124,6 +110,47 @@
          </size>
         </property>
        </spacer>
+      </item>
+     </layout>
+    </item>
+    <item row="1" column="1">
+     <layout class="QGridLayout" name="gridLayout_3">
+      <item row="0" column="0">
+       <widget class="QRadioButton" name="rdb_autoSource">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Auto Source :</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QRadioButton" name="rdb_manualSource">
+        <property name="text">
+         <string>Manual Source :</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="KUrlRequester" name="manualSource">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QPushButton" name="autoSource">
+        <property name="text">
+         <string>Select Auto Source</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>
