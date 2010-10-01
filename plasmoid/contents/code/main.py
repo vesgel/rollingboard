@@ -48,7 +48,7 @@ class LineDisplayer(Plasma.TextBrowser):
     def mousePressEvent(self, event):
 	#Plasma.TextBrowser.mousePressEvent(self, event)
 	if event.button() == Qt.LeftButton:	    
-	    self.board.__onClick()
+	    self.board._onClick()
 
     def refreshText(self):
 	self.setText(self.board.line.__unicode__())
@@ -85,11 +85,11 @@ class RollingBoard(plasmascript.Applet):
         self.fetchRandomLine()
         #self.update()
 
-    def __onClick(self):
-        self.__resetTimer()
-        self.fetchRandomLine()        
+    def _onClick(self):
+        self._resetTimer()
+        self.fetchRandomLine()
 
-    def __resetTimer(self):
+    def _resetTimer(self):
 	try:
           self.killTimer(self.mytimer)
         except:
@@ -117,7 +117,7 @@ class RollingBoard(plasmascript.Applet):
         textBrowser.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)        
         self.mainLayout.addItem(textBrowser)
         self.applet.setLayout(self.mainLayout)
-	self.__resetTimer()
+	self._resetTimer()
 	
     #=============== CONFIG METHODS ============================
     def createConfigurationInterface(self, parent):
@@ -170,7 +170,7 @@ class RollingBoard(plasmascript.Applet):
         values['authorColor'] = self.generalCP.authorColor.color()
 
         self.generalConfig.writeConfig(values)
-        #self.__resetTimer()
+        #self._resetTimer()
 
     def configDenied(self):
         print "..config denied!.."
