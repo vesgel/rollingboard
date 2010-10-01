@@ -28,9 +28,7 @@ class GeneralConfig:
 
         if generalGroup.hasKey("sourceFile"):
             sourceFile = generalGroup.readEntry("sourceFile")
-        else:
-            sourceFile = None
-            
+
         if generalGroup.hasKey("textColor"):
             textColor = generalGroup.readEntry("textColor", QColor(0xcc, 0xcc, 0xcc))
         else:
@@ -42,7 +40,7 @@ class GeneralConfig:
             authorColor = Qt.green
 
         return sourceFile, textColor, authorColor
-            
+
     def writeConfig(self, sourceFile, textColor, authorColor):
         generalGroup = self.config.group("General")
 
