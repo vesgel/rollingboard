@@ -47,7 +47,7 @@ class LineDisplayer(Plasma.TextBrowser):
     def mousePressEvent(self, event):
 	#Plasma.TextBrowser.mousePressEvent(self, event)
 	if event.button() == Qt.LeftButton:	    
-	    self.board.fetchRandomLine()
+	    self.board.__onClick()
 
     def refreshText(self):
 	self.setText(self.board.line.__unicode__())
@@ -60,22 +60,44 @@ class RollingBoard(plasmascript.Applet):
     def init(self):
         self.setHasConfigurationInterface(True)
         self.setAspectRatioMode(Plasma.IgnoreAspectRatio)
-
         self.theme = Plasma.Svg(self)
         self.theme.setImagePath("widgets/background")
         self.setBackgroundHints(Plasma.Applet.DefaultBackground)
-
         self.resize(400, 100)
-
+	
+	# TODO: Get these from config
+	self.automin = 0
+        self.autosec = 3
+        
         self.conf = self.config()
         self.generalConfig = GeneralConfig(self.conf)
         
         self.__createMainLayout()
 
+    #=============== OPERATIONAL METHODS ============================
+    
     def fetchRandomLine(self):
 	self.line = self.document.get_random_line()
 	self.textBrowser.refreshText()
-	
+
+    def timerEvent(self, event):
+        self.fetchRandomLine()
+        #self.update()
+
+    def __onClick(self):
+        self.__resetTimer()
+        self.fetchRandomLine()        
+
+    def __resetTimer(self):
+	try:
+          self.killTimer(self.mytimer)
+        except:
+          pass
+        timerval = (int(self.automin)*60+int(self.autosec))*1000
+        if timerval > 0:
+           self.mytimer = self.startTimer(timerval)
+        
+    #=============== LAYOUT METHODS ============================
     def __createMainLayout(self):
         self.mainLayout = QGraphicsLinearLayout(Qt.Vertical, self.applet)
         self.document = Document(self.package().path(), self.conf)
@@ -93,9 +115,10 @@ class RollingBoard(plasmascript.Applet):
         textBrowser.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         textBrowser.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)        
         self.mainLayout.addItem(textBrowser)
-
         self.applet.setLayout(self.mainLayout)
-
+	self.__resetTimer()
+	
+    #=============== CONFIG METHODS ============================
     def createConfigurationInterface(self, parent):
         self.connect(parent, SIGNAL("okClicked()"), self.configAccepted)
         self.connect(parent, SIGNAL("cancelClicked()"), self.configDenied)
@@ -118,6 +141,8 @@ class RollingBoard(plasmascript.Applet):
         authorColor = self.generalConfigPage.authorColor.color()
 
         self.generalConfig.writeConfig(sourceFile, QVariant(textColor), QVariant(authorColor))
+        #self.__resetTimer()
+
 
     def configDenied(self):
         print "..config denied!.."
