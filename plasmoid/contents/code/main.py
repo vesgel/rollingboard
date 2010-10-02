@@ -23,7 +23,6 @@ from data_manager import DataManager
 import webbrowser
 
 
-
 class LineDisplayer(Plasma.TextBrowser):
     def __init__(self, parent=None):
 	Plasma.TextBrowser.__init__(self, parent)
@@ -47,7 +46,7 @@ class LineDisplayer(Plasma.TextBrowser):
 
     def mousePressEvent(self, event):
 	#Plasma.TextBrowser.mousePressEvent(self, event)
-	if event.button() == Qt.LeftButton:	    
+	if event.button() == Qt.LeftButton:
 	    self.board._onClick()
 
     def refreshText(self):
@@ -114,7 +113,7 @@ class RollingBoard(plasmascript.Applet):
         textBrowser.refreshText()
         textBrowser.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         textBrowser.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        textBrowser.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)        
+        textBrowser.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.mainLayout.addItem(textBrowser)
         self.applet.setLayout(self.mainLayout)
 	self._resetTimer()
@@ -127,8 +126,9 @@ class RollingBoard(plasmascript.Applet):
         self.generalCP = QWidget(parent)  # General Config Page
         uic.loadUi(self.package().filePath('ui', 'generalconfig.ui'), self.generalCP)
         parent.addPage(self.generalCP, "General", 'configure', "General Configuration Options")
-        
-        ASMenu = ASPopup(self.generalCP)
+
+        # Popup Menu for Auto Sources
+        ASMenu = ASPopup(self.generalCP, self.package())
         self.generalCP.autoSource.setMenu(ASMenu)
         
         values = self.generalConfig.readConfig()
