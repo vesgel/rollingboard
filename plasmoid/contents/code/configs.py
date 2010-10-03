@@ -20,10 +20,11 @@ class GeneralConfig:
         self.readConfig()
 
     def readConfig(self):
-        values = { 'sourceType'  : None,
-                   'source'      : None,
-                   'textColor'   : None,
-                   'authorColor' : None }
+        values = { 'sourceType'    : None,
+                   'source'        : None,
+                   'textColor'     : None,
+                   'authorColor'   : None,
+                   'timerInterval' : None }
 
         generalGroup = self.config.group("General")
 
@@ -43,6 +44,11 @@ class GeneralConfig:
         else:
             values['authorColor'] = Qt.green
 
+        if generalGroup.hasKey("timerInterval"):
+            values['timerInterval'] = generalGroup.readEntry("timerInterval")
+        else:
+            values['timerInterval'] = "00:03"
+
         return values
 
     def writeConfig(self, values):
@@ -52,3 +58,4 @@ class GeneralConfig:
         generalGroup.writeEntry("source", values['source'])
         generalGroup.writeEntry("textColor", values['textColor'])
         generalGroup.writeEntry("authorColor", values['authorColor'])
+        generalGroup.writeEntry("timerInterval", values['timerInterval'])

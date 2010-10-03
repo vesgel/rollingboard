@@ -11,15 +11,22 @@
 # Please read the COPYING file.
 #
 
+# PyQt4 Section
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from PyQt4 import uic
+
+# PyKDE4 Section
 from PyKDE4.plasma import Plasma
 from PyKDE4 import plasmascript
+
+# Application Section
 from html_parser import Document
 from configs import GeneralConfig
 from widgets import ASPopup
 from data_manager import DataManager
+
+# System Section
 import webbrowser
 
 
@@ -27,15 +34,15 @@ class LineDisplayer(Plasma.TextBrowser):
     def __init__(self, parent=None):
 	Plasma.TextBrowser.__init__(self, parent)
 	self.parent = parent
-	
+
     def contextMenuEvent(self, event):
 	self.menu = menu = QMenu(None)
 	copyToClipboard = menu.addAction("Copy to clipboard")
 	twitter = menu.addAction("Share on Twitter")
 	friendfeed = menu.addAction("Share on FriendFeed")
-	
+
 	action = menu.exec_(event.screenPos())
-        
+
         if action == copyToClipboard:
 	    clipboard = QApplication.clipboard()
 	    clipboard.setText(self.board.line.plain_text)
@@ -51,7 +58,7 @@ class LineDisplayer(Plasma.TextBrowser):
 
     def refreshText(self):
 	self.setText(self.board.line.__unicode__())
-	
+
 class RollingBoard(plasmascript.Applet):
 
     def __init__(self, parent, args=None):
@@ -64,18 +71,14 @@ class RollingBoard(plasmascript.Applet):
         self.theme.setImagePath("widgets/background")
         self.setBackgroundHints(Plasma.Applet.DefaultBackground)
         self.resize(400, 100)
-	
-	# TODO: Get these from config
-	self.automin = 0
-        self.autosec = 3
-        
+
         self.conf = self.config()
-        self.generalConfig = GeneralConfig(self.conf)
-        
+        self.loadConfigurations()
+
         self.__createMainLayout()
 
     #=============== OPERATIONAL METHODS ============================
-    
+
     def fetchRandomLine(self):
 	self.line = self.document.get_random_line()
 	self.textBrowser.refreshText()
@@ -96,7 +99,19 @@ class RollingBoard(plasmascript.Applet):
         timerval = (int(self.automin)*60+int(self.autosec))*1000
         if timerval > 0:
            self.mytimer = self.startTimer(timerval)
-        
+
+    def getTimerIntervals(self, timer_interval):
+        time = timer_interval.split(":")
+        min, sec = map(lambda t: int(t), time)
+        return min, sec
+
+    def loadConfigurations(self):
+        self.generalConfig = GeneralConfig(self.conf)
+        self.confValues = self.generalConfig.readConfig()
+
+        self.automin, self.autosec = self.getTimerIntervals(self.confValues['timerInterval'])
+        self._resetTimer()
+
     #=============== LAYOUT METHODS ============================
     def __createMainLayout(self):
         self.mainLayout = QGraphicsLinearLayout(Qt.Vertical, self.applet)
@@ -106,23 +121,22 @@ class RollingBoard(plasmascript.Applet):
 
         self.textBrowser = textBrowser = LineDisplayer(self.applet)
         textBrowser.board = self
-        
+
         textBrowserNW = textBrowser.nativeWidget()
         textBrowserNW.setReadOnly(True)
-        
+
         textBrowser.refreshText()
         textBrowser.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         textBrowser.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         textBrowser.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.mainLayout.addItem(textBrowser)
         self.applet.setLayout(self.mainLayout)
-	self._resetTimer()
-	
+
     #=============== CONFIG METHODS ============================
     def createConfigurationInterface(self, parent):
         self.connect(parent, SIGNAL("okClicked()"), self.configAccepted)
         self.connect(parent, SIGNAL("cancelClicked()"), self.configDenied)
-        
+
         self.generalCP = QWidget(parent)  # General Config Page
         uic.loadUi(self.package().filePath('ui', 'generalconfig.ui'), self.generalCP)
         parent.addPage(self.generalCP, "General", 'configure', "General Configuration Options")
@@ -130,7 +144,7 @@ class RollingBoard(plasmascript.Applet):
         # Popup Menu for Auto Sources
         ASMenu = ASPopup(self.generalCP, self.package())
         self.generalCP.autoSource.setMenu(ASMenu)
-        
+
         values = self.generalConfig.readConfig()
         if not values['source']:
             values['source'] = ""
@@ -151,15 +165,19 @@ class RollingBoard(plasmascript.Applet):
         self.generalCP.textColor.setColor(QColor(values['textColor']))
         self.generalCP.authorColor.setColor(QColor(values['authorColor']))
 
+        min, sec = self.getTimerIntervals(values['timerInterval'])
+        self.generalCP.timeEdit.setTime(QTime(min, sec))
+
         # We have only two radio buttons and connecting one of them with signal is OK.
         self.connect(self.generalCP.rdb_manualSource, SIGNAL("toggled(bool)"), self.sourceChanged)
-        
+
     def configAccepted(self):
-        values = { 'sourceType'  : None,
-                   'source'      : None,
-                   'textColor'   : None,
-                   'authorColor' : None }
-        
+        values = { 'sourceType'    : None,
+                   'source'        : None,
+                   'textColor'     : None,
+                   'authorColor'   : None,
+                   'timerInterval' : None }
+
         if self.generalCP.rdb_autoSource.isChecked():
             values['sourceType'] = "Auto"
             #values['source'] = self.generalCP.sourceAddress.currentText()
@@ -168,9 +186,10 @@ class RollingBoard(plasmascript.Applet):
             values['source'] = self.generalGP.manualSource.text()
         values['textColor'] = self.generalCP.textColor.color()
         values['authorColor'] = self.generalCP.authorColor.color()
+        values['timerInterval'] = self.generalCP.timeEdit.text()
 
         self.generalConfig.writeConfig(values)
-        #self._resetTimer()
+        self.loadConfigurations()
 
     def configDenied(self):
         print "..config denied!.."

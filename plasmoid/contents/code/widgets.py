@@ -11,23 +11,45 @@
 # Please read the COPYING file.
 #
 
+# PyQt4 Section
 from PyQt4.QtCore import *
 from PyQt4 import QtGui
 from PyQt4 import uic
 
+# PyKDE4 Section
 from PyKDE4.kdeui import KIcon
 
+# Application Section
+from data_manager import DataManager
+
+# System Section
+import os
+
+(AVAILABLE, INSTALLED) = range(2)
+
 class ASItemWidget(QtGui.QWidget):
-    def __init__(self, parent, data, item, package):
+    def __init__(self, parent, data, item, mode, package):
         QtGui.QWidget.__init__(self, parent)
         self.item = item
         self.data = data
+        self.mode = mode
 
         ui_class, widget_class = uic.loadUiType(package.filePath('ui', 'sourceitem.ui'))
         self.ui = ui_class()
         self.ui.setupUi(self)
-        self.ui.labelName.setText(data)
-        self.ui.buttonInstall.setIcon(KIcon("go-down"))
+
+        if self.mode == AVAILABLE:
+            name = self.data[2]
+            self.ui.buttonRemove.hide()
+            self.ui.buttonApply.setIcon(KIcon("go-down"))
+            self.ui.buttonApply.setToolTip("Download Source")
+        else:
+            name = self.data
+            self.ui.buttonRemove.setIcon(KIcon("list-remove"))
+            self.ui.buttonRemove.setToolTip("Remove Source")
+            self.ui.buttonApply.setToolTip("Select Source")
+
+        self.ui.labelName.setText(name)
 
 class ASPopup(QtGui.QMenu):
     # Auto Sources Popup Class
@@ -35,6 +57,9 @@ class ASPopup(QtGui.QMenu):
         QtGui.QMenu.__init__(self, parent)
         self.parent = parent
         self.package = package
+        package_path = self.package.path()
+        self.data_path = "%scontents/data" % package_path
+        self.dataManager = DataManager(self.data_path)
 
         self.mainLayout = QtGui.QGridLayout(self)
 
@@ -47,7 +72,8 @@ class ASPopup(QtGui.QMenu):
         self.installedList = QtGui.QListWidget(self)
         self.installedList.setMinimumSize(QSize(260, 150))
         self.mainLayout.addWidget(self.installedList, 1, 0, 1, 1)
-        self.loadItems(self.installedList)
+        installedSourceList = os.listdir(self.data_path)
+        self.loadItems(self.installedList, installedSourceList, INSTALLED)
 
         # Label for Available Sources
         lbl_as = QtGui.QLabel(self)
@@ -58,12 +84,12 @@ class ASPopup(QtGui.QMenu):
         self.availableList = QtGui.QListWidget(self)
         self.availableList.setMinimumSize(QSize(260, 150))
         self.mainLayout.addWidget(self.availableList, 3, 0, 1, 1)
+        availableSourceList = self.dataManager.fetch_available_data()
+        self.loadItems(self.availableList, availableSourceList, AVAILABLE)
 
-    def loadItems(self, listWidget):
-        items = ["Resource 1", "Resource 2", "Resource 3", "Resource 4"]
-
-        for i in items:
-            item  = QtGui.QListWidgetItem(listWidget)
+    def loadItems(self, list_widget, data_list, mode):
+        for data in data_list:
+            item  = QtGui.QListWidgetItem(list_widget)
             item.setSizeHint(QSize(250, 32))
-            asw = ASItemWidget(self, i, item, self.package)
-            listWidget.setItemWidget(item, asw)
+            asw = ASItemWidget(self, data, item, mode, self.package)
+            list_widget.setItemWidget(item, asw)
