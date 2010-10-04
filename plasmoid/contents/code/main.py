@@ -102,7 +102,7 @@ class RollingBoard(plasmascript.Applet):
 
     def getTimerIntervals(self, timer_interval):
         time = timer_interval.split(":")
-        min, sec = map(lambda t: int(t), time)
+        min, sec = map(int, time)
         return min, sec
 
     def loadConfigurations(self):

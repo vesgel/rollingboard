@@ -26,6 +26,7 @@ from data_manager import DataManager
 import os
 
 (AVAILABLE, INSTALLED) = range(2)
+REPO_BASE = "http://www.emrealadag.com/dosyalar/program/rollingboard"
 
 class ASItemWidget(QtGui.QWidget):
     def __init__(self, parent, data, item, mode, package):
@@ -39,12 +40,15 @@ class ASItemWidget(QtGui.QWidget):
         self.ui.setupUi(self)
 
         if self.mode == AVAILABLE:
-            name = self.data[2]
+            name = "[%s] %s" % (self.data[0], self.data[2])
+            self.url = "%s/%s" % (REPO_BASE, self.data[1])
             self.ui.buttonRemove.hide()
             self.ui.buttonApply.setIcon(KIcon("go-down"))
             self.ui.buttonApply.setToolTip("Download Source")
         else:
-            name = self.data
+            #name = "[%s] %s" % (self.data[0], self.data[2])
+            name = self.data[2]
+            self.url = package.filePath('data', self.data[1]) 
             self.ui.buttonRemove.setIcon(KIcon("list-remove"))
             self.ui.buttonRemove.setToolTip("Remove Source")
             self.ui.buttonApply.setToolTip("Select Source")
@@ -72,7 +76,9 @@ class ASPopup(QtGui.QMenu):
         self.installedList = QtGui.QListWidget(self)
         self.installedList.setMinimumSize(QSize(260, 150))
         self.mainLayout.addWidget(self.installedList, 1, 0, 1, 1)
-        installedSourceList = os.listdir(self.data_path)
+        installedSourceList = self.analyseDataDirectory()
+        
+        #installedSourceList = os.listdir(self.data_path)
         self.loadItems(self.installedList, installedSourceList, INSTALLED)
 
         # Label for Available Sources
@@ -84,9 +90,24 @@ class ASPopup(QtGui.QMenu):
         self.availableList = QtGui.QListWidget(self)
         self.availableList.setMinimumSize(QSize(260, 150))
         self.mainLayout.addWidget(self.availableList, 3, 0, 1, 1)
-        availableSourceList = self.dataManager.fetch_available_data()
+        availableSourceList = self.dataManager.record_list #fetch_available_data()
         self.loadItems(self.availableList, availableSourceList, AVAILABLE)
 
+    def analyseSourceFile(self, filename):
+	fn = "%s/%s" % (self.data_path, filename)
+	f = open( fn )
+	line = f.readline().strip()
+	if line[0] == "#":
+	    langCode, description = line.split("|")
+	    return (langCode, filename, description)
+	return None
+	
+    def analyseDataDirectory(self):
+	files = os.listdir(self.data_path)	
+	record_list = map(self.analyseSourceFile, files)
+	record_list = filter(lambda x: x, record_list)
+	return record_list
+	    
     def loadItems(self, list_widget, data_list, mode):
         for data in data_list:
             item  = QtGui.QListWidgetItem(list_widget)

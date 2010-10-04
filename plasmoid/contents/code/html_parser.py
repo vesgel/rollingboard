@@ -30,7 +30,7 @@ class Document:
 	    filename = package_path + "contents/data/words_of_wisdom.txt"
 	    print "now:",filename
 	    
-        self.lines = map( strip, open(filename).readlines() )
+        self.lines = map( strip, open(filename).readlines()[1:] )
         self.current_line = -1
         self.size = len(self.lines)
         

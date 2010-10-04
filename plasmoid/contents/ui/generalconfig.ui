@@ -190,6 +190,16 @@
           <height>16777215</height>
          </size>
         </property>
+        <property name="displayFormat">
+         <string>hh:mm</string>
+        </property>
+        <property name="time">
+         <time>
+          <hour>0</hour>
+          <minute>3</minute>
+          <second>0</second>
+         </time>
+        </property>
        </widget>
       </item>
      </layout>
